@@ -1,25 +1,58 @@
 package p
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
-	"html"
+	"log"
 	"net/http"
+	"runtime/debug"
+	"time"
+
+	"github.com/Neu-Robotics/Sanigift-CF/shared"
+	"github.com/kr/pretty"
+	"github.com/pkg/errors"
 )
 
-var d struct {
+const (
+	// BucketName SaniGift uploaded image bucket
+	BucketName = "sanigift-uploaded-images"
+	// ProjectID GCP project_id
+	ProjectID = "nextep-279317"
+)
+
+type res struct {
 	Message string `json:"message"`
 }
 
-// Uploader func dumps file into Storage bucket
-func Uploader(w http.ResponseWriter, r *http.Request) {
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
-		fmt.Fprintf(w, "Hello World")
-		return
+// UploadImage func dumps file into Storage bucket
+func UploadImage(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if r := recover(); r != nil {
+			w.WriteHeader(500)
+			json.NewEncoder(w).Encode(res{Message: "Upload Unsuccessful!"})
+			log.Fatal(r)
+			pretty.Log(debug.Stack())
+			return
+		}
+
+		json.NewEncoder(w).Encode(res{Message: "File Uploaded"})
+	}()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	defer cancel()
+
+	f, h, err := r.FormFile("image")
+	if err != nil {
+		panic(errors.Wrap(err, "Failed to process FormFile"))
 	}
-	if d.Message == "" {
-		fmt.Fprintf(w, "Hello, World!")
-		return
+
+	opts := shared.StorageOpts{
+		BucketName:      BucketName,
+		ProjectID:       ProjectID,
+		CredentialsJSON: shared.GetCredentials(),
 	}
-	fmt.Fprintf(w, html.EscapeString(d.Message))
+
+	s := shared.NewStorage(ctx, opts)
+
+	s.AddFile(h.Filename, f)
 }
