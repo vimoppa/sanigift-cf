@@ -1,26 +1,19 @@
 package shared
 
 import (
-	"io/ioutil"
+	"encoding/base64"
 	"os"
-	"path/filepath"
 
 	"github.com/pkg/errors"
 )
 
-const (
-	credentialPathVar = "GOOGLE_APPLICATION_CREDENTIALS"
-)
-
 // GetCredentials gets GOOGLE_APPLICATION_CREDENTIALS from env
 func GetCredentials() []byte {
-	p := os.Getenv(credentialPathVar)
+	p := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
-	ud, _ := os.UserHomeDir()
-
-	b, err := ioutil.ReadFile(filepath.Join(ud, p))
+	b, err := base64.StdEncoding.DecodeString(p)
 	if err != nil {
-		panic(errors.Wrap(err, "Couldn't read Credential File"))
+		panic(errors.Wrap(err, "Failed to decode base64 credential string"))
 	}
 
 	return b
