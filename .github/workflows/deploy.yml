@@ -4,9 +4,6 @@ on:
   push:
     branches: [master]
 
-env:
-  REPOSITORY_NAME: SaniGistUploader
-
 jobs:
   build:
     name: Build
@@ -50,10 +47,5 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
-      - run: git config --global credential.'https://source.developers.google.com'.helper gcloud.sh
-
-      - name: Add remote
-        run: git remote add google https://source.developers.google.com/p/${{ secrets.GCP_PROJECT_ID }}/r/$REPOSITORY_NAME
-
-      - name: Push
-        run: git push -f --all google
+      - name: Deploy function
+        run: gcloud functions deploy UploadImage --runtime go113 --trigger-http --allow-unauthenticated
