@@ -3,13 +3,13 @@ package p
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"runtime/debug"
 	"time"
 
 	"github.com/Neu-Robotics/Sanigift-CF/shared"
-	"github.com/kr/pretty"
 	"github.com/pkg/errors"
 )
 
@@ -30,9 +30,8 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		if r := recover(); r != nil {
 			w.WriteHeader(500)
 			json.NewEncoder(w).Encode(res{Message: "Upload Unsuccessful!"})
-			log.Fatal(r)
-			pretty.Log(debug.Stack())
-			return
+			fmt.Println(r)
+			log.Fatalf("%s", debug.Stack())
 		}
 
 		json.NewEncoder(w).Encode(res{Message: "File Uploaded"})
