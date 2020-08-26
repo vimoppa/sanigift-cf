@@ -47,9 +47,8 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	opts := shared.StorageOpts{
-		BucketName:      BucketName,
-		ProjectID:       ProjectID,
-		CredentialsJSON: shared.GetCredentials(),
+		BucketName: BucketName,
+		ProjectID:  ProjectID,
 	}
 
 	s := shared.NewStorage(ctx, opts)

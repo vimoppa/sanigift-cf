@@ -9,7 +9,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/pkg/errors"
-	"google.golang.org/api/option"
 )
 
 // Storage wraps gcloud storage bucket
@@ -20,14 +19,13 @@ type Storage struct {
 
 // StorageOpts required New Storage params
 type StorageOpts struct {
-	BucketName      string
-	ProjectID       string
-	CredentialsJSON []byte
+	BucketName string
+	ProjectID  string
 }
 
 // NewStorage creats new storage
 func NewStorage(ctx context.Context, opts StorageOpts) Storage {
-	client, err := storage.NewClient(ctx, option.WithCredentialsJSON(opts.CredentialsJSON))
+	client, err := storage.NewClient(ctx)
 	if err != nil {
 		panic(errors.Wrap(err, "Storage client failed to initialize"))
 	}
